@@ -2,6 +2,8 @@
 
 React + TypeScript + Vite + Ant Design 前端，接入 tool 模块的六个真实接口。
 
+开发范围、当前进度、接口约定、部署和后续验收见 [首版开发方案与交接说明](./首版开发方案.md)。
+
 ## 本地运行
 
 使用 Node.js 22.12+，推荐 Node.js 22 LTS。
@@ -31,6 +33,12 @@ npm run preview
 ## 生产部署
 
 发布 `dist`，将前端路由回退到 `index.html`。浏览器请求使用 `/api/tool/...`，生产网关必须移除 `/api` 前缀，再转发至后端 `/tool/...`。`VITE_API_BASE_URL` 用于本地代理配置和错误信息，静态产物的生产转发地址由网关配置。后端地址变更后，生产环境需要同步更新网关。
+
+服务器入口为 `http://47.98.191.92/ecp/`，对应构建命令为 `VITE_BASE_PATH=/ecp/ npm run build`。子路径构建的接口请求使用 `/ecp/api/tool/...`。
+
+静态文件上传到 `/opt/ecp/releases/<版本>/ecp/`，`/opt/ecp/current` 指向当前版本目录。Nginx 配置模板为 `deploy/ecp.nginx.conf`，服务器加载位置为 `/etc/nginx/default.d/ecp.conf`。更新前保留旧版本，执行 `nginx -t` 成功后再重载 Nginx。需要回退时将 `current` 指回旧版本。
+
+后端地址恢复或变化时，更新服务器 `ecp.conf` 中的 `$ecp_backend` 并验证、重载 Nginx。部署凭据通过交互式登录使用。
 
 ## 首版兼容约定
 

@@ -27,14 +27,14 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  // 浏览器只访问同源 /api；隧道地址集中配置，生产由反向代理完成转发。
+  // 请求沿用构建时的站点前缀，支持 /ecp/ 等子路径下的同源代理。
   const timeout = AbortSignal.timeout(25000);
   const signal = options.signal
     ? AbortSignal.any([options.signal, timeout])
     : timeout;
   let response: Response;
   try {
-    response = await fetch(`/api${path}`, {
+    response = await fetch(`${import.meta.env.BASE_URL}api${path}`, {
       ...options,
       headers: {
         Accept: "application/json",

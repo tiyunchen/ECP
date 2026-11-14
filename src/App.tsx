@@ -39,7 +39,12 @@ function Layout() {
       <header className="top-navigation">
         <div className="brand">
           <span className="brand-logo">
-            <img src="/assets/logo-mark.svg" alt="" width="14" height="14" />
+            <img
+              src={`${import.meta.env.BASE_URL}assets/logo-mark.svg`}
+              alt=""
+              width="14"
+              height="14"
+            />
           </span>
           <span>环保管理平台</span>
         </div>
@@ -86,7 +91,11 @@ function RouteError() {
       title="页面加载失败"
       subTitle={errorMessage(error)}
       extra={
-        <Button onClick={() => window.location.assign("/calculations")}>
+        <Button
+          onClick={() =>
+            window.location.assign(`${import.meta.env.BASE_URL}calculations`)
+          }
+        >
           返回计算记录
         </Button>
       }
@@ -94,29 +103,37 @@ function RouteError() {
   );
 }
 
-const router = createBrowserRouter([
-  {
-    element: <Layout />,
-    errorElement: <RouteError />,
-    children: [
-      { index: true, element: <Navigate to="/calculations" replace /> },
-      { path: "calculations", element: <ProjectList /> },
-      { path: "calculations/new", element: <CalculationPage /> },
-      { path: "calculations/:id/edit", element: <CalculationPage /> },
-      { path: "calculations/:id", element: <CalculationPage readOnly /> },
-      {
-        path: "*",
-        element: (
-          <Result
-            status="404"
-            title="页面不存在"
-            extra={<a href="/calculations">返回计算记录</a>}
-          />
-        ),
-      },
-    ],
-  },
-]);
+// basename 与 Vite 的资源前缀一致，使子页面刷新和站内导航都停留在本站点内。
+const router = createBrowserRouter(
+  [
+    {
+      element: <Layout />,
+      errorElement: <RouteError />,
+      children: [
+        { index: true, element: <Navigate to="/calculations" replace /> },
+        { path: "calculations", element: <ProjectList /> },
+        { path: "calculations/new", element: <CalculationPage /> },
+        { path: "calculations/:id/edit", element: <CalculationPage /> },
+        { path: "calculations/:id", element: <CalculationPage readOnly /> },
+        {
+          path: "*",
+          element: (
+            <Result
+              status="404"
+              title="页面不存在"
+              extra={
+                <a href={`${import.meta.env.BASE_URL}calculations`}>
+                  返回计算记录
+                </a>
+              }
+            />
+          ),
+        },
+      ],
+    },
+  ],
+  { basename: import.meta.env.BASE_URL },
+);
 
 export default function App() {
   return (

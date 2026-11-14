@@ -5,20 +5,20 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe("tool API 请求契约", () => {
   it("系数查询中文自动编码并使用同源代理路径", async () => {
-    const fetch = vi
-      .fn()
-      .mockResolvedValue(
-        new Response(
-          JSON.stringify({
-            code: 0,
-            data: { list: [], total: 0, page: 1, page_size: 8 },
-          }),
-        ),
-      );
+    const fetch = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          code: 0,
+          data: { list: [], total: 0, page: 1, page_size: 8 },
+        }),
+      ),
+    );
     vi.stubGlobal("fetch", fetch);
     await api.coefficients({ pollutant_name: "颗粒物", page: 1, page_size: 8 });
     const url = new URL(fetch.mock.calls[0][0], "http://localhost");
-    expect(url.pathname).toBe("/api/tool/pollutant_coefficient/page");
+    expect(url.pathname).toBe(
+      `${import.meta.env.BASE_URL}api/tool/pollutant_coefficient/page`,
+    );
     expect(url.searchParams.get("pollutant_name")).toBe("颗粒物");
     expect(fetch.mock.calls[0][1].headers.Authorization).toBeUndefined();
   });
@@ -43,29 +43,25 @@ describe("tool API 请求契约", () => {
   it("兼容鉴权、参数校验和非 JSON 网关错误", async () => {
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(
-          new Response(JSON.stringify({ detail: "缺少Token" }), {
-            status: 401,
-          }),
-        ),
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ detail: "缺少Token" }), {
+          status: 401,
+        }),
+      ),
     );
     await expect(api.projects({ page: 1, page_size: 10 })).rejects.toThrow(
       "缺少Token",
     );
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(
-          new Response(
-            JSON.stringify({
-              detail: [{ loc: ["body", "items"], msg: "Field required" }],
-            }),
-            { status: 422 },
-          ),
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            detail: [{ loc: ["body", "items"], msg: "Field required" }],
+          }),
+          { status: 422 },
         ),
+      ),
     );
     await expect(api.preview([])).rejects.toThrow("body.items Field required");
     vi.stubGlobal(
